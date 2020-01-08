@@ -1,11 +1,49 @@
 #!/usr/bin/python
 
-from math import (tan,exp,log,sqrt,acos,asin,atan,pi,sin,cos)
+from math import (tan,exp,log,sqrt,acos,asin,atan,atan2,pi,sin,cos)
+
+def JD(year,month,day):
+  d = 367*year
+  d = d - (7*(year + (month+9)//12))//4
+  d = d + (275*month)//9
+  d = d + day - 730530
+  return d+2451543.5
+
+stjarnhimlen_epoch = JD(1990,4,19)
 
 def deg(theta):
   return theta*180/pi
 def rad(theta):
   return theta*pi/180
+
+def canonise_degrees(theta):
+  if (theta>360):
+   return theta-360*int(theta/360)
+  if (theta<0):
+   return theta-360*int(theta/360)
+  return theta
+
+for u in [-500,-400,-300,-200,-100,0,100,200,300,400,500]:
+ print u, canonise_degrees(u)
+
+def atan2_deg(x,y):
+  u = atan2(x,y)
+  return deg(u)
+
+def xyz_to_sphere(x,y,z):
+  r = sqrt(x*x+y*y+z*z)
+  RA = atan2_deg(y,x)
+  dec = atan2_deg(z, sqrt(x*x+y*y))
+  return (r,RA,dec)
+
+def apply_angles(x,y,i,w,N):
+  # go via polar coordinates
+  r=sqrt(x*x+y*y)
+  v=atan2_deg(y,x)
+  xec=r*(cos(rad(N)) * cos(rad(v+w)) - sin(rad(N))*sin(rad(v+w))*cos(rad(i)))
+  yec=r*(sin(rad(N)) * cos(rad(v+w)) + cos(rad(N))*sin(rad(v+w))*cos(rad(i)))
+  zec=r*sin(rad(v+w))*sin(rad(i))
+  return (xec,yec,zec)
 
 def phase_integral(alpha, G):
  A=[3.332,1.862]
@@ -32,6 +70,7 @@ bennu=[2457600.5,  1.1264,0.20375,  101.7039, 6.0349, 66.2231, 2.0609]
 aethra=[2458600.5, 2.6081153,0.3897105,    272.421295, 24.994693, 255.199349, 258.392616]
 earth=[2451545.0,  1.0000,0.01673,  100.47,  0.000, 102.93, 0]
 mars =[2451545.0,  1.5237,0.09337,  355.43,  1.852, 336.08, 49.71]
+ceres=[2458600.5,   2.769165,0.076009, 77.372, 10.594, 73.597, 80.305]
 
 GM_earth = 398600 # km^3 s^-2
 GM_sun = 132712440000 # km^3 s^-2
@@ -84,14 +123,17 @@ def true_from_ecc(e, theta):
     phi=phi+2*pi
   return phi
 
-def mean_from_ecc(e,M):
-  m = M-e*sin(M)
+def mean_from_ecc(e,E):
+  m = E-e*sin(E)
   if (m<0):
     m=m+2*pi
   return m
 
 # algorithm 3.1: E(e,M)
 def ecc_from_mean(e,M):
+  if (e>1):
+    print "Eccentricity >1, have you got the arguments %s,%s to ecc_from_mean the wrong way round?" % (e,M)
+    return None
   if (M<pi):
     E=M+e/2
   else:
@@ -180,3 +222,94 @@ asclepius_elements=[2456805.5, 1.0224, 0.3570, 194.55, 4.919, 180.30, 255.30]
 asclepius_in_seconds = period_from_pa(0.6574*au, 1.3874*au, GM_sun)
 print asclepius_in_seconds
 print asclepius_in_seconds/86400
+
+
+# stjarnhimlen's example is Mercury on 19/04/1990
+
+N=48.2163
+i=7.0045
+w=29.0882
+a=0.387098
+e=0.205633
+M=69.5153
+
+# compute position in X-Y plane
+E = ecc_from_mean(e,rad(M))
+x = a * (cos(E)-e)
+y = a*sqrt(1-e**2)*sin(E)
+
+print "E=%s (%s) x=%s y=%s" % (E,deg(E),x,y)
+
+r=sqrt(x*x+y*y)
+v=atan2_deg(x,y)
+
+print "r=%s v=%s" % (r,v)
+
+x,y,z=apply_angles(x,y,i,w,N)
+print "x=%s y=%s z=%s" % (x,y,z)
+
+r,lon,lat=xyz_to_sphere(x,y,z)
+print "r=%s lon=%s lat=%s" % (r,lon,lat)
+
+# how about Earth?
+
+print "Earth"
+N=0
+i=0
+w=282.7735
+a=1
+e=0.016713
+M=canonise_degrees(-3135.9347)
+
+# compute position in X-Y plane                                                                                   
+E = ecc_from_mean(e,rad(M))
+x = a * (cos(E)-e)
+y = a*sqrt(1-e**2)*sin(E)
+
+print "E=%s (%s) x=%s y=%s" % (E,deg(E),x,y)
+
+r=sqrt(x*x+y*y)
+v=atan2_deg(x,y)
+
+print "r=%s v=%s" % (r,v)
+
+x,y,z=apply_angles(x,y,i,w,N)
+print "x=%s y=%s z=%s" % (x,y,z)
+
+r,lon,lat=xyz_to_sphere(x,y,z)
+print "r=%s lon=%s lat=%s" % (r,lon,lat)
+
+# how about Ceres?
+# http://cosinekitty.com/solar_system.html says
+# 1.07934 -2.69794 -0.28376
+# at day=7313.79381 (from JD 2000.0)
+
+day=7313.79381
+JD_offset=JD(1999,12,31)
+
+print ceres
+thing = ceres
+N=0
+i=thing[4]
+w=0
+a=thing[1]
+e=thing[2]
+M=0
+
+# compute position in X-Y plane                                                                                   
+E = ecc_from_mean(e,rad(M))
+x = a * (cos(E)-e)
+y = a*sqrt(1-e**2)*sin(E)
+
+print "E=%s (%s) x=%s y=%s" % (E,deg(E),x,y)
+
+r=sqrt(x*x+y*y)
+v=atan2_deg(x,y)
+
+print "r=%s v=%s" % (r,v)
+
+x,y,z=apply_angles(x,y,i,w,N)
+print "x=%s y=%s z=%s" % (x,y,z)
+
+r,lon,lat=xyz_to_sphere(x,y,z)
+print "r=%s lon=%s lat=%s" % (r,lon,lat)
