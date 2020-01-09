@@ -120,6 +120,9 @@ def angle(X,Y,Z):
   ca = vecdot(xy,yz)/veclen(xy)/veclen(yz)
   return acos(ca)
 
+def distance(X,Y):
+  return veclen(vecadd(X,vecscale(-1.0,Y)))
+
 def ecc_from_pa(perigee, apogee):
   return (apogee-perigee)/(apogee+perigee)
 
@@ -279,7 +282,7 @@ def planet_xyz(orbelts, time):
 
  period_in_days = 365.25*a**1.5
  mean_motion = 360.0 / period_in_days
- print "Mean motion %s degrees per day" % mean_motion
+# print "Mean motion %s degrees per day" % mean_motion
  M=orbelts[3]+mean_motion*days_since_epoch
 
  # compute position in X-Y plane
@@ -287,15 +290,10 @@ def planet_xyz(orbelts, time):
  x = a * (cos(E)-e)
  y = a*sqrt(1-e**2)*sin(E)
 
- print "E=%s (%s) x=%s y=%s" % (E,deg(E),x,y)
-
- r=sqrt(x*x+y*y)
- v=atan2_deg(x,y)
-
- print "r=%s v=%s" % (r,v)
+# print "E=%s (%s) x=%s y=%s" % (E,deg(E),x,y)
 
  x,y,z=apply_angles(x,y,i,w,N)
- print "x=%s y=%s z=%s" % (x,y,z)
+# print "x=%s y=%s z=%s" % (x,y,z)
  return [x,y,z]
 
 
