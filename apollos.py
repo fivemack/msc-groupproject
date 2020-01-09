@@ -8,7 +8,7 @@ from collections import defaultdict
 
 asteroids = []
 
-A=open("../Apollos.txt")
+A=open("../Atens.txt")
 ct=1
 for line in A:
 # print line
@@ -33,6 +33,10 @@ for line in A:
   except:
     skip=True
 
+  # ignore intrinsically tiny objects
+  if (H>24.0):
+   skip=True
+
   if (not skip):
    obj = [epoch_JD, a, e, M, i, w, N]
    name = line[27:36]
@@ -42,65 +46,97 @@ for line in A:
 print len(asteroids)
 
 ever_visible = [False for r in range(len(asteroids))]
+weeks_visible=[0 for r in range(len(asteroids))]
+minimum_distance=[999.99 for r in range(len(asteroids))]
 
 date = JD(2025,1,1) # first date we are interested in
-earth_xyz = planet_xyz(earth, date)
 earth_hill_radius = pow(mass_earth/(3*mass_sun),1./3)
 l1_proportion = 1-earth_hill_radius
-sat_xyz = vecscale(l1_proportion,earth_xyz)
 
-num=0
-happy=0
-too_near_sun=0
-too_near_earth=0
-too_faint=0
+years=10
+for week in range(52*years):
+ earth_xyz = planet_xyz(earth, date)
+ sat_xyz = vecscale(l1_proportion,earth_xyz)
 
-dist_hist = {}
-brightness_hist = defaultdict(int)
+ num=0
+ happy=0
+ too_near_sun=0
+ too_near_earth=0
+ too_faint=0
 
-for A in asteroids:
- obj_xyz = planet_xyz(A[1], date)
+ dist_hist = {}
+ brightness_hist = defaultdict(int)
+
+ for Ai in range(len(asteroids)):
+  A=asteroids[Ai]
+  obj_xyz = planet_xyz(A[1], date)
 # print "Earth XYZ = ",earth_xyz
 # print "Satellite XYZ = ",sat_xyz
 # print "Object XYZ = ",obj_xyz
 
- angle_ssa = deg(angle([0,0,0],sat_xyz,obj_xyz))
- angle_esa = 180-angle_ssa # L1 geometry
- dist = distance(sat_xyz, obj_xyz)
+  angle_ssa = deg(angle([0,0,0],sat_xyz,obj_xyz))
+  angle_esa = 180-angle_ssa # L1 geometry
+  dist = distance(sat_xyz, obj_xyz)
+  if (dist < minimum_distance[Ai]):
+   minimum_distance[Ai]=dist
  
- dist_bin = int(10*dist)
- if (dist_bin in dist_hist):
-  dist_hist[dist_bin] = 1+dist_hist[dist_bin]
- else:
-  dist_hist[dist_bin] = 1
+#  dist_bin = int(10*dist)
+#  if (dist_bin in dist_hist):
+#   dist_hist[dist_bin] = 1+dist_hist[dist_bin]
+#  else:
+#   dist_hist[dist_bin] = 1
 
- kludge_brightness = A[2] + 5*math.log(dist)
+  kludge_brightness = A[2] + 5*math.log(dist)
 
- print A[2], dist, kludge_brightness
- brightness_bin = int(10*kludge_brightness)
- brightness_hist[brightness_bin] = 1+brightness_hist[brightness_bin]
+#  print A[2], dist, kludge_brightness
+#  brightness_bin = int(10*kludge_brightness)
+#  brightness_hist[brightness_bin] = 1+brightness_hist[brightness_bin]
 
- if (dist > 10.0):
-  # this asteroid is a comet
-  print A
+  #if (dist > 10.0):
+   # this asteroid is a comet
+   #print A
 
- ok = True
- if (angle_ssa<45.0):
-  ok = False
-  too_near_sun = 1+too_near_sun
+  ok = True
+  if (angle_ssa<45.0):
+   ok = False
+   too_near_sun = 1+too_near_sun
 
- if (angle_esa<45.0):
-  ok=False
-  too_near_earth = 1+too_near_earth
+  if (angle_esa<45.0):
+   ok=False
+   too_near_earth = 1+too_near_earth
 
- if (kludge_brightness > 20.0):
-  ok=False
-  too_faint = 1+too_faint
+  if (kludge_brightness > 22.0):
+   ok=False
+   too_faint = 1+too_faint
 
- if (ok==True):
-  happy=1+happy
+  if (ok==True):
+   ever_visible[Ai] = True
+   weeks_visible[Ai]=1+weeks_visible[Ai]
+   happy=1+happy
  
- num=1+num
+  num=1+num
 
-print num, too_near_sun, too_near_earth, too_faint, happy
+ count_ever_happy = sum([1 for i in ever_visible if i==True])
+ print week, num, too_near_sun, too_near_earth, too_faint, happy, count_ever_happy
+
+ date = date + 7
+ if (week==103 or week==259 or week==519):
+  print "Distance histogram at week %s" % week
+  hist_mindist=defaultdict(int)
+  for i in minimum_distance:
+   ix = int(10*i)
+   hist_mindist[ix]=1+hist_mindist[ix]
+  S=sorted(minimum_distance)
+
+  print hist_mindist
+
+  for u in range(1,20):
+   qq = 0.05*u
+   print ("%.2f"%qq)," ",S[int(len(S)*qq)]
+
+hist_visibility=defaultdict(int)
+for i in weeks_visible:
+ hist_visibility[i]=1+hist_visibility[i]
+
+print hist_visibility
 
