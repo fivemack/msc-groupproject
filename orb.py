@@ -72,6 +72,13 @@ ceres=[2458600.5,   2.769165,0.076009, 77.372, 10.594, 73.597, 80.305]
 
 mercury=[2451545.0,  0.387098,0.205630,  174.796,  7.005, 29.124, 48.331]
 
+earth=[JD(1999,12,31),
+       1, 0.016713,
+       356.0470,
+       0,
+       282.7735-180,
+       0]
+
 GM_earth = 398600 # km^3 s^-2
 GM_sun = 132712440000 # km^3 s^-2
 mass_sun = 1.938e30 # kg
@@ -261,6 +268,36 @@ print "x=%s y=%s z=%s" % (x,y,z)
 
 r,lon,lat=xyz_to_sphere(x,y,z)
 print "r=%s lon=%s lat=%s" % (r,lon,lat)
+
+def planet_xyz(orbelts, time):
+ days_since_epoch = time - orbelts[0]
+ N=orbelts[6]
+ i=orbelts[4]
+ w=orbelts[5]
+ a=orbelts[1]
+ e=orbelts[2]
+
+ period_in_days = 365.25*a**1.5
+ mean_motion = 360.0 / period_in_days
+ print "Mean motion %s degrees per day" % mean_motion
+ M=orbelts[3]+mean_motion*days_since_epoch
+
+ # compute position in X-Y plane
+ E = ecc_from_mean(e,rad(M))
+ x = a * (cos(E)-e)
+ y = a*sqrt(1-e**2)*sin(E)
+
+ print "E=%s (%s) x=%s y=%s" % (E,deg(E),x,y)
+
+ r=sqrt(x*x+y*y)
+ v=atan2_deg(x,y)
+
+ print "r=%s v=%s" % (r,v)
+
+ x,y,z=apply_angles(x,y,i,w,N)
+ print "x=%s y=%s z=%s" % (x,y,z)
+ return [x,y,z]
+
 
 # how about Earth?
 
