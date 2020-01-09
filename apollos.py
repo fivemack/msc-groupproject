@@ -3,6 +3,9 @@ from orb import angle,distance,vecscale,deg
 
 from orb import earth, mass_earth, mass_sun
 
+import math
+from collections import defaultdict
+
 asteroids = []
 
 A=open("../Apollos.txt")
@@ -18,7 +21,7 @@ for line in A:
    break
   epoch_JD = JD(int(epoch_Y), int(epoch_M), int(epoch_D))
   emoid = float(line[54:62])
-  a = float(line[115:120])
+  a = float(line[114:120])
   M = float(line[82:87])
   w = float(line[89:94])
   N = float(line[95:100])
@@ -32,11 +35,13 @@ for line in A:
 
   if (not skip):
    obj = [epoch_JD, a, e, M, i, w, N]
-   name = line[27:35]
-   asteroids = asteroids + [[name, obj, H]]
+   name = line[27:36]
+   asteroids = asteroids + [[name, obj, H, emoid]]
  ct=1+ct
 
 print len(asteroids)
+
+ever_visible = [False for r in range(len(asteroids))]
 
 date = JD(2025,1,1) # first date we are interested in
 earth_xyz = planet_xyz(earth, date)
@@ -48,8 +53,10 @@ num=0
 happy=0
 too_near_sun=0
 too_near_earth=0
+too_faint=0
 
 dist_hist = {}
+brightness_hist = defaultdict(int)
 
 for A in asteroids:
  obj_xyz = planet_xyz(A[1], date)
@@ -67,6 +74,12 @@ for A in asteroids:
  else:
   dist_hist[dist_bin] = 1
 
+ kludge_brightness = A[2] + 5*math.log(dist)
+
+ print A[2], dist, kludge_brightness
+ brightness_bin = int(10*kludge_brightness)
+ brightness_hist[brightness_bin] = 1+brightness_hist[brightness_bin]
+
  if (dist > 10.0):
   # this asteroid is a comet
   print A
@@ -80,10 +93,14 @@ for A in asteroids:
   ok=False
   too_near_earth = 1+too_near_earth
 
+ if (kludge_brightness > 20.0):
+  ok=False
+  too_faint = 1+too_faint
+
  if (ok==True):
   happy=1+happy
+ 
  num=1+num
 
-print num, too_near_sun, too_near_earth, happy
+print num, too_near_sun, too_near_earth, too_faint, happy
 
-print dist_hist
