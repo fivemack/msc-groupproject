@@ -159,12 +159,16 @@ def ecc_from_mean(e,M):
     E=M+e/2
   else:
     E=M-e/2
-  while True:
+  iters=0
+  while iters<100:
     f=E-e*sin(E)-M
     fdash=1-e*cos(E)
     if (abs(f/fdash) < 1e-8):
       return E
     E=E-f/fdash
+    iters=1+iters
+  print "Convergence failure of ecc_from_mean(%s,%s (%s degrees)): returning M" % (e,M,deg(M))
+  return M
 
 perigee=9600.0
 apogee=21000.0
@@ -283,7 +287,7 @@ def planet_xyz(orbelts, time):
  period_in_days = 365.25*a**1.5
  mean_motion = 360.0 / period_in_days
 # print "Mean motion %s degrees per day" % mean_motion
- M=orbelts[3]+mean_motion*days_since_epoch
+ M=canonise_degrees(orbelts[3]+mean_motion*days_since_epoch)
 
  # compute position in X-Y plane
  E = ecc_from_mean(e,rad(M))
