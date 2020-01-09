@@ -1,0 +1,34 @@
+MISSION PARAMETERS
+
+6138 objects exist
+
+Sun exclusion 45, earth exclusion 45, magnitude 20, one-week scan
+    4304 objects ever seen
+
+Sun exclusion 30
+    4334 objects ever seen - not worth it
+
+Earth exclusion 30
+      4327 objects ever seen - not worth it
+
+magnitude 21
+	  4689 objects ever seen
+magnitude 22
+	  5047 objects ever seen
+magnitude 24
+	  5658 objects ever seen
+
+So, what’s the distribution of minimum distance over the five years?
+
+* Apollos: 90% of objects never get within 1.4AU
+ in a two-year mission, 90% never get within 1.83AU
+ in a ten-year mission, 90% never get within 0.98AU
+
+* Amors:       2.06AU (2yr)
+  	       1.60AU (5yr)
+	       	      1.24AU (10yr)
+
+* Atens: by definition the objects are much nearer
+  1.29AU (2yr)
+  0.83AU (5yr)
+  0.38AU (10yr)
