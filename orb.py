@@ -18,13 +18,11 @@ def rad(theta):
 
 def canonise_degrees(theta):
   if (theta>360):
-   return theta-360*int(theta/360)
+   return theta-360*int(theta/360.0)
   if (theta<0):
-   return theta-360*int(theta/360)
-  return theta
-
-for u in [-500,-400,-300,-200,-100,0,100,200,300,400,500]:
- print u, canonise_degrees(u)
+   return theta+360-360*int(theta/360.0)
+  else:
+   return theta
 
 def atan2_deg(x,y):
   u = atan2(x,y)
@@ -72,8 +70,12 @@ earth=[2451545.0,  1.0000,0.01673,  100.47,  0.000, 102.93, 0]
 mars =[2451545.0,  1.5237,0.09337,  355.43,  1.852, 336.08, 49.71]
 ceres=[2458600.5,   2.769165,0.076009, 77.372, 10.594, 73.597, 80.305]
 
+mercury=[2451545.0,  0.387098,0.205630,  174.796,  7.005, 29.124, 48.331]
+
 GM_earth = 398600 # km^3 s^-2
 GM_sun = 132712440000 # km^3 s^-2
+mass_sun = 1.938e30 # kg
+mass_earth = 5.972e24 # kg 
 
 def veclen(v):
   return sqrt(sum([j**2 for j in v]))
@@ -92,15 +94,24 @@ def veccross(X,Y):
   return [X[1]*Y[2]-Y[1]*X[2], X[2]*Y[0]-Y[2]*X[0], X[0]*Y[1]-Y[0]*X[1]]
 
 def vecscale(k,V):
-  print "Scaling %s by %f" % (V,k)
+#  print "Scaling %s by %f" % (V,k)
   return [k*w for w in V]
 
 def vecadd(X,Y):
   if (len(X)!=len(Y)):
     print "Vectors %s and %s are different lengths\n" % (X,Y)
     return None
-  print "Adding %s to %s" % (X,Y)
+#  print "Adding %s to %s" % (X,Y)
   return [X[i]+Y[i] for i in range(len(X))]
+
+def angle(X,Y,Z):
+  if (len(X)!=len(Y) or len(Y)!=len(Z)):
+    print "Vectors %s %s %s need to be the same element count\n" %(X,Y,Z)
+    return None
+  xy = vecadd(Y,vecscale(-1.0,X))
+  yz = vecadd(Y,vecscale(-1.0,Z))
+  ca = vecdot(xy,yz)/veclen(xy)/veclen(yz)
+  return acos(ca)
 
 def ecc_from_pa(perigee, apogee):
   return (apogee-perigee)/(apogee+perigee)
@@ -253,48 +264,32 @@ print "r=%s lon=%s lat=%s" % (r,lon,lat)
 
 # how about Earth?
 
-print "Earth"
-N=0
-i=0
-w=282.7735
-a=1
-e=0.016713
-M=canonise_degrees(-3135.9347)
-
-# compute position in X-Y plane                                                                                   
-E = ecc_from_mean(e,rad(M))
-x = a * (cos(E)-e)
-y = a*sqrt(1-e**2)*sin(E)
-
-print "E=%s (%s) x=%s y=%s" % (E,deg(E),x,y)
-
-r=sqrt(x*x+y*y)
-v=atan2_deg(x,y)
-
-print "r=%s v=%s" % (r,v)
-
-x,y,z=apply_angles(x,y,i,w,N)
-print "x=%s y=%s z=%s" % (x,y,z)
-
-r,lon,lat=xyz_to_sphere(x,y,z)
-print "r=%s lon=%s lat=%s" % (r,lon,lat)
-
 # how about Ceres?
 # http://cosinekitty.com/solar_system.html says
 # 1.07934 -2.69794 -0.28376
 # at day=7313.79381 (from JD 2000.0)
 
-day=7313.79381
+day=7314.449
 JD_offset=JD(1999,12,31)
+real_day = JD_offset+day
 
 print ceres
 thing = ceres
-N=0
+
+days_since_epoch = real_day - ceres[0]
+
+N=thing[6]
 i=thing[4]
-w=0
+w=thing[5]
 a=thing[1]
 e=thing[2]
-M=0
+
+period_in_days = 365.25*a**1.5
+mean_motion = 360.0 / period_in_days
+print "Mean motion %s degrees per day" % mean_motion
+M=thing[3]+mean_motion*days_since_epoch
+
+
 
 # compute position in X-Y plane                                                                                   
 E = ecc_from_mean(e,rad(M))
@@ -310,6 +305,54 @@ print "r=%s v=%s" % (r,v)
 
 x,y,z=apply_angles(x,y,i,w,N)
 print "x=%s y=%s z=%s" % (x,y,z)
+ceres_xyz=[x,y,z]
 
 r,lon,lat=xyz_to_sphere(x,y,z)
 print "r=%s lon=%s lat=%s" % (r,lon,lat)
+
+print "Earth"
+N=0
+i=0
+w=282.7735-180 # because I had figures for Sun-from-Earth not v/v
+a=1
+e=0.016713
+mean_motion_per_day=0.9856002585
+days_since_epoch = real_day - JD_offset
+days_since_epoch = 7314.449
+print "Days since epoch = %s" % days_since_epoch
+M=canonise_degrees(356.0470 + mean_motion_per_day * days_since_epoch)
+# 
+#M=canonise_degrees(-3135.9347)
+
+print "canonised M is %s" % M
+
+# compute position in X-Y plane                                                                                   
+E = ecc_from_mean(e,rad(M))
+x = a * (cos(E)-e)
+y = a*sqrt(1-e**2)*sin(E)
+
+print "E=%s (%s) x=%s y=%s z=0" % (E,deg(E),x,y)
+
+r=sqrt(x*x+y*y)
+v=atan2_deg(x,y)
+
+print "r=%s v=%s" % (r,v)
+
+x,y,z=apply_angles(x,y,i,w,N)
+print "M=%s x=%s y=%s z=%s" % (M,x,y,z)
+
+r,lon,lat=xyz_to_sphere(x,y,z)
+print "r=%s lon=%s lat=%s" % (r,lon,lat)
+
+earth_xyz = [x,y,z]
+earth_hill_radius = pow(mass_earth/(3*mass_sun),1./3)
+l1_proportion = 1-earth_hill_radius
+sat_xyz = vecscale(l1_proportion,earth_xyz)
+print "Earth XYZ = ",earth_xyz
+print "Satellite XYZ = ",sat_xyz
+print "Ceres XYZ = ",ceres_xyz
+
+# sun is at 0,0,0
+print "Sun-Earth-Ceres angle is %s" % deg(angle([0,0,0],earth_xyz,ceres_xyz))
+
+
