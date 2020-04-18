@@ -96,7 +96,7 @@ def vecdot(X,Y):
 def veccross(X,Y):
   if (len(X)!=3 and len(Y)!=3):
     print "Cross-product is of 3D vectors"
-    return None
+    assert False
   print X,Y
   return [X[1]*Y[2]-Y[1]*X[2], X[2]*Y[0]-Y[2]*X[0], X[0]*Y[1]-Y[0]*X[1]]
 
@@ -107,14 +107,13 @@ def vecscale(k,V):
 def vecadd(X,Y):
   if (len(X)!=len(Y)):
     print "Vectors %s and %s are different lengths\n" % (X,Y)
-    return None
-#  print "Adding %s to %s" % (X,Y)
+    assert False
   return [X[i]+Y[i] for i in range(len(X))]
 
 def angle(X,Y,Z):
   if (len(X)!=len(Y) or len(Y)!=len(Z)):
     print "Vectors %s %s %s need to be the same element count\n" %(X,Y,Z)
-    return None
+    assert False
   xy = vecadd(Y,vecscale(-1.0,X))
   yz = vecadd(Y,vecscale(-1.0,Z))
   ca = vecdot(xy,yz)/veclen(xy)/veclen(yz)
@@ -154,7 +153,7 @@ def mean_from_ecc(e,E):
 def ecc_from_mean(e,M):
   if (e>1):
     print "Eccentricity >1, have you got the arguments %s,%s to ecc_from_mean the wrong way round?" % (e,M)
-    return None
+    assert False
   if (M<pi):
     E=M+e/2
   else:
