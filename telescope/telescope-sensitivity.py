@@ -14,15 +14,14 @@ asteroid_emissivity = 0.9
 asteroid_range = 1.4*AU
 
 total_asteroid_power = stefan_boltzmann * asteroid_emissivity * 4*pi * (asteroid_diameter/2)**2 * asteroid_temperature**4
-print "Power emitted by asteroid is %s W" % total_asteroid_power
+print "Power emitted by asteroid is %.3g W" % total_asteroid_power
 
 power_per_area_at_telescope = total_asteroid_power / (4*pi*asteroid_range**2)
-print power_per_area_at_telescope
-
 telescope_aperture_area = pi * (telescope_diameter/2)**2
-
-power_per_telescope = power_per_area_at_telescope * telescope_aperture_area
-print "Power from asteroid at telescope is %s W" % power_per_telescope
+bolo_power_per_telescope = power_per_area_at_telescope * telescope_aperture_area
+print "Bolometric power from asteroid at telescope is %.3g W" % bolo_power_per_telescope
+proportion_in_wavelength_window = 0.107 # this is important and is _not_ the result from planck.py
+power_per_telescope = proportion_in_wavelength_window * bolo_power_per_telescope
 
 # statistics to do with the detector
 H2RG_pixel_size = 1.8e-5
