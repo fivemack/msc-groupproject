@@ -85,3 +85,16 @@ electrons_per_second = H2RG_quantum_efficiency * photons_per_second
 
 print "Faintest source produces %.3g detectable photons (%.3g electrons) per second" % (photons_per_second, electrons_per_second)
 
+snr = 5
+noise = H2RG_dark_eps + zodi_photons_pix*H2RG_quantum_efficiency
+print "Noise is about %.3g electrons per second" % noise
+exposure = (snr**2*noise) / (electrons_per_second**2)
+print "Exposure for S/N=5 = %.1f seconds" % exposure
+print "Which produces noise=%f  signal=%f  sqrt(noise)=%f" % (noise*exposure, electrons_per_second*exposure, sqrt(noise*exposure))
+
+# statistics to do with the spacecraft
+pan_time_seconds = 10
+
+sky_scan_time = (exposure + pan_time_seconds) * fields_per_sky
+
+print "Scan the sky in %.3g seconds" % sky_scan_time
