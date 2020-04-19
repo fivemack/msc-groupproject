@@ -29,10 +29,12 @@ wavelength = 1e-5
 pixels_per_dl = 3
 dl_radians = 1.22 * wavelength / telescope_diameter
 dl_arcsec = dl_radians * arcsec_per_radian
-print "Diffraction limit is %s arcseconds" % dl_arcsec
+print "Diffraction limit is %.2f arcseconds" % dl_arcsec
 
 FOV_pixels = 4096
 
 # we want dl*focal_length=H2RG_pixel_size
-focal_length = H2RG_pixel_size / dl_radians
-print focal_length
+focal_length = pixels_per_dl * H2RG_pixel_size / dl_radians
+focal_ratio = focal_length / telescope_diameter
+print "Focal length for %s pixels per diffraction-limit is %.2f metres, ratio %.2f" % (pixels_per_dl, focal_length, focal_ratio)
+
