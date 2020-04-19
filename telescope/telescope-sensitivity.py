@@ -1,3 +1,7 @@
+from math import exp,pi
+
+stefan_boltzmann = 5.67e-8
+
 asteroid_diameter = 140
 telescope_diameter = 0.7
 asteroid_temperature = 240
