@@ -14,28 +14,28 @@ def planck(wavelength,temperature):
 
  return classical/(quantum-1)
  
-# this is 'energy per unit wavelength'
+def waveband_proportion(T,lo,hi):
+ sz = 1e-8
+ q=0
+ reached_tail = False
+ accumulated_power = 0
+ last_power_in_region = -7
+ while (not reached_tail):
+  w = (q+0.5)*sz
+  power_in_region = planck(w,T)*sz
+  if (power_in_region < last_power_in_region and power_in_region < 1e-8):
+   reached_tail = True
+  accumulated_power = accumulated_power + power_in_region
+  last_power_in_region = power_in_region
+  q=q+1
+ 
+ power_in_band = 0
+ for q in range(int(lo/sz),int(hi/sz)):
+  w = (q+0.5)*sz
+  power_in_region = planck(w,T)*sz
+  power_in_band = power_in_band + power_in_region
+ 
+ return power_in_band / accumulated_power
 
-sz = 1e-8
-q=0
-reached_tail = False
-accumulated_power = 0
-last_power_in_region = -7
-T=40
-while (not reached_tail):
- w = (q+0.5)*sz
- power_in_region = planck(w,T)*sz
- if (power_in_region < last_power_in_region and power_in_region < 1e-8):
-  reached_tail = True
- accumulated_power = accumulated_power + power_in_region
- last_power_in_region = power_in_region
- q=q+1
- 
-q_range = q
-power_in_band = 0
-for q in range(800,1200):
- w = (q+0.5)*sz
- power_in_region = planck(w,T)*sz
- power_in_band = power_in_band + power_in_region
- 
-print power_in_band / accumulated_power
+for T in [40,200,210,220,230,240,250,260,270,280,290,300,310,320,330,340,350,360,370,380,390,400,3000,30000]:
+ print "%s\t%s" % (T,waveband_proportion(T,8e-6,12e-6))
