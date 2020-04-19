@@ -4,6 +4,8 @@ arcsec_per_radian = (180*3600)/pi
 degrees = pi/180 # convert degrees to radians
 
 stefan_boltzmann = 5.67e-8
+planck_h = 6.626e-34
+speed_of_light = 2.998e8
 AU = 1.5e11
 
 asteroid_diameter = 140
@@ -25,7 +27,10 @@ power_per_telescope = proportion_in_wavelength_window * bolo_power_per_telescope
 
 # statistics to do with the detector
 H2RG_pixel_size = 1.8e-5
+H2RG_quantum_efficiency = 0.6
+H2RG_dark_eps = 200
 wavelength = 1e-5
+photon_energy = planck_h * speed_of_light / wavelength
 pixels_per_dl = 3
 dl_radians = 1.22 * wavelength / telescope_diameter
 dl_arcsec = dl_radians * arcsec_per_radian
@@ -56,4 +61,10 @@ sky_area_squaredeg = sky_area_squaredeg * (1+cos(sun_exclusion_degrees*degrees))
 fields_per_sky = sky_area_squaredeg / FOV_area_squaredeg
 
 print "%.4g fields-of-view tile the usable sky" % fields_per_sky
+
+# photons from the source
+photons_per_second = power_per_telescope / photon_energy
+electrons_per_second = H2RG_quantum_efficiency * photons_per_second
+
+print "Faintest source produces %.3g detectable photons (%.3g electrons) per second" % (photons_per_second, electrons_per_second)
 
