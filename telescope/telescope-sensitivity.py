@@ -30,6 +30,8 @@ H2RG_pixel_size = 1.8e-5
 H2RG_quantum_efficiency = 0.6
 H2RG_dark_eps = 200
 wavelength = 1e-5
+band_short = 8e-6
+band_long = 12e-6
 photon_energy = planck_h * speed_of_light / wavelength
 pixels_per_dl = 3
 dl_radians = 1.22 * wavelength / telescope_diameter
@@ -39,6 +41,7 @@ print "Diffraction limit is %.2f arcseconds" % dl_arcsec
 FOV_pixels = 4096
 
 # we want dl*focal_length=H2RG_pixel_size
+
 focal_length = pixels_per_dl * H2RG_pixel_size / dl_radians
 focal_ratio = focal_length / telescope_diameter
 print "Focal length for %s pixels per diffraction-limit is %.2f metres, ratio %.2f" % (pixels_per_dl, focal_length, focal_ratio)
@@ -61,6 +64,20 @@ sky_area_squaredeg = sky_area_squaredeg * (1+cos(sun_exclusion_degrees*degrees))
 fields_per_sky = sky_area_squaredeg / FOV_area_squaredeg
 
 print "%.4g fields-of-view tile the usable sky" % fields_per_sky
+
+# the zodiacal light background
+zodi_jansky_per_steradian = 3e7 # median figure from [Reach & Morris 2003]
+# one Jy is 10^-26 W per square metre per Hz
+freq_long = speed_of_light / band_long
+freq_short = speed_of_light / band_short
+bandwidth_Hz = freq_short - freq_long
+zodi_W_m2_sr = zodi_jansky_per_steradian * 1e-26 * bandwidth_Hz
+print "Zodiacal-light power per square metre aperture per steradian = %.3g W" % zodi_W_m2_sr
+pixel_size_in_sr = (H2RG_pixel_size / focal_length)**2
+print "Pixel is %.3g sr" % pixel_size_in_sr
+zodi_W_pix = zodi_W_m2_sr * pixel_size_in_sr * telescope_aperture_area
+zodi_photons_pix = zodi_W_pix / photon_energy
+print "Zodiacal light per pixel is %.3g W (%.3g photons/sec)" % (zodi_W_pix, zodi_photons_pix)
 
 # photons from the source
 photons_per_second = power_per_telescope / photon_energy
