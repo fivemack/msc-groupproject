@@ -27,7 +27,7 @@ def sky_scan_time(telescope_diameter, asteroid_range):
     telescope_aperture_area = pi * (telescope_diameter/2)**2
     bolo_power_per_telescope = power_per_area_at_telescope * telescope_aperture_area
     pront( "Bolometric power from asteroid at telescope is %.3g W" % bolo_power_per_telescope )
-    proportion_in_wavelength_window = 0.107 # this is important and is _not_ the result from planck.py
+    proportion_in_wavelength_window = 0.191 # this is the result from planck.py
     power_per_telescope = proportion_in_wavelength_window * bolo_power_per_telescope
 
     # statistics to do with the detector
