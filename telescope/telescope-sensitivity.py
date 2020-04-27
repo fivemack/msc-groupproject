@@ -9,9 +9,9 @@ planck_h = 6.626e-34
 speed_of_light = 2.998e8
 AU = 1.5e11
 
-def sky_scan_time(telescope_diameter, asteroid_range):
-    display_intermediate = False
+display_intermediate = True
 
+def sky_scan_time(telescope_diameter, asteroid_range):
     def pront(x):
         if (display_intermediate):
             print(x)
@@ -105,6 +105,12 @@ def sky_scan_time(telescope_diameter, asteroid_range):
 
     return sky_scan_time
 
+display_intermediate = True
+
+print(sky_scan_time(1.0,1.0*AU))
+print(sky_scan_time(0.7,1.4*AU))
+
+display_intermediate = False
 for diameter in [0.7, 0.8, 0.9, 1.0, 1.2]:
     for asteroid_range in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]:
         print("%.1f %.1f %.3g" % (diameter, asteroid_range, sky_scan_time(diameter,asteroid_range*AU)))
