@@ -81,7 +81,7 @@ def sky_scan_time(telescope_diameter, asteroid_range):
     pront( "Pixel is %.3g sr" % pixel_size_in_sr )
     zodi_W_pix = zodi_W_m2_sr * pixel_size_in_sr * telescope_aperture_area
     zodi_photons_pix = zodi_W_pix / photon_energy
-    pront( "Zodiacal light per pixel is %.3g W (%.3g photons/sec)" % (zodi_W_pix, zodi_photons_pix) )
+    pront( "Zodiacal light per pixel is %.3g W (%.3g photons/sec) (%.3g electrons/sec)" % (zodi_W_pix, zodi_photons_pix, zodi_photons_pix*H2RG_quantum_efficiency) )
 
     # photons from the source
     photons_per_second = power_per_telescope / photon_energy
