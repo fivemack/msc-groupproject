@@ -83,18 +83,20 @@ def sky_scan_time(telescope_diameter, asteroid_range):
     zodi_photons_pix = zodi_W_pix / photon_energy
     pront( "Zodiacal light per pixel is %.3g W (%.3g photons/sec) (%.3g electrons/sec)" % (zodi_W_pix, zodi_photons_pix, zodi_photons_pix*H2RG_quantum_efficiency) )
 
-    # photons from the source
+    # photons from the source are spread out over the oversampled diffraction disc
     photons_per_second = power_per_telescope / photon_energy
-    electrons_per_second = H2RG_quantum_efficiency * photons_per_second
+    photons_per_second_per_pixel = photons_per_second * 0.838 / (pi*pixels_per_dl**2/4)
+    electrons_per_second_per_pixel = H2RG_quantum_efficiency * photons_per_second_per_pixel
 
-    pront( "Faintest source produces %.3g detectable photons (%.3g electrons) per second" % (photons_per_second, electrons_per_second) )
+    pront( "Faintest source produces %.3g detectable photons (%.3g electrons) per pixel second" % 
+    (photons_per_second_per_pixel, electrons_per_second_per_pixel) )
 
     snr = 5
     noise = H2RG_dark_eps + zodi_photons_pix*H2RG_quantum_efficiency
     pront( "Noise is about %.3g electrons per second" % noise )
-    exposure = (snr**2*noise) / (electrons_per_second**2)
+    exposure = (snr**2*noise) / (electrons_per_second_per_pixel**2)
     pront( "Exposure for S/N=5 = %.1f seconds" % exposure )
-    pront( "Which produces noise=%f  signal=%f  sqrt(noise)=%f" % (noise*exposure, electrons_per_second*exposure, sqrt(noise*exposure)) )
+    pront( "Which produces noise=%f  signal=%f  sqrt(noise)=%f" % (noise*exposure, electrons_per_second_per_pixel*exposure, sqrt(noise*exposure)) )
 
     # statistics to do with the spacecraft
     pan_time_seconds = 10
