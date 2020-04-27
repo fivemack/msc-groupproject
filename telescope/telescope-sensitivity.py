@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/local/bin/python3
 from math import exp,pi,sqrt,sin,cos,tan
 
 arcsec_per_radian = (180*3600)/pi
