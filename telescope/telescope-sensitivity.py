@@ -98,8 +98,9 @@ def sky_scan_time(telescope_diameter, asteroid_range):
 
     # statistics to do with the spacecraft
     pan_time_seconds = 10
+    row_repeats = 3
 
-    sky_scan_time = (exposure + pan_time_seconds) * fields_per_sky
+    sky_scan_time = (exposure + pan_time_seconds) * (fields_per_sky * row_repeats)
 
     pront( "Scan the sky in %.3g seconds" % sky_scan_time )
 
