@@ -104,7 +104,7 @@ def sky_scan_time(telescope_diameter, asteroid_range):
 
     pront( "Scan the sky in %.3g seconds" % sky_scan_time )
 
-    return sky_scan_time
+    return [sky_scan_time, FOV_width_degrees, zodi_photons_pix, exposure]
 
 display_intermediate = True
 
@@ -112,8 +112,10 @@ print(sky_scan_time(1.0,1.0*AU))
 print(sky_scan_time(0.7,1.4*AU))
 
 display_intermediate = False
-for diameter in [0.7, 0.8, 0.9, 1.0, 1.2]:
-    for asteroid_range in [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]:
-        print("%.1f %.1f %.3g" % (diameter, asteroid_range, sky_scan_time(diameter,asteroid_range*AU)))
+
+for diameter in [0.7, 0.8, 0.9, 1.0, 1.2, 1.5, 2.0, 4.0]:
+    for asteroid_range in [0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5]:
+        xx=sky_scan_time(diameter,asteroid_range*AU)
+        print("%.1f %.2f %.3g %.3g %s" % (diameter, asteroid_range, xx[0], xx[1], xx))
     print()
 
